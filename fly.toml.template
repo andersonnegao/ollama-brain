@@ -1,0 +1,42 @@
+# fly.toml: Deploy configuration for Fly.io
+# Use this as template when deploying
+
+app = "dossier-api"
+primary_region = "syd"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[build.args]
+
+[env]
+  OLLAMA_MODEL = "mistral:latest"
+  WHISPER_MODEL = "base"
+  ENV = "prod"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[http_service.checks]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "40s"
+  method = "get"
+  path = "/health"
+
+[[mounts]]
+  source = "ollama_data"
+  destination = "/root/.ollama"
+  initial_size = "50gb"
+  auto_extend_size_percent = 20
+
+# Machines scaling (optional)
+# [http_service.concurrency]
+#   type = "connections"
+#   hard_limit = 1000
+#   soft_limit = 800
